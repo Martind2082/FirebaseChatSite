@@ -2,14 +2,17 @@ import { useContext, useEffect, useState } from 'react';
 import './index.css';
 import { Authcontext } from './Authcontext';
 import {db} from './Firebase.jsx';
-import {addDoc, collection, deleteDoc, doc, setDoc, query, onSnapshot, serverTimestamp, orderBy, } from 'firebase/firestore';
+import {addDoc, collection, deleteDoc, doc, updateDoc, query, onSnapshot, serverTimestamp, orderBy, } from 'firebase/firestore';
+import { useRef } from 'react';
 
 const Home = () => {
+    const input = useRef();
     const {googlesignin, user, logout} = useContext(Authcontext);
     const [text, setText] = useState('');
     const [editing, setEditing] = useState(false);
     const [editid, setEditid] = useState('');
     const [messages, setMessages] = useState([]);
+    const [editlocation, setEditlocation] = useState();
 
     useEffect(() => {
         const q = query(collection(db, 'messages'), orderBy("createdAt"))
@@ -48,16 +51,19 @@ const Home = () => {
     const editmessage = (e) => {
         e.preventDefault();
         const docRef = doc(db, 'messages', editid);
-        const payload = {text: text};
-        setDoc(docRef, payload);
+        console.log(docRef);
+        const replace = {text: text, createdAt: messages[editlocation].createdAt};
+        updateDoc(docRef, replace);
         setEditing(false);
     }
     const edit = (id) => {
         for (let i = 0; i < messages.length; i++) {
             if (messages[i].id === id) {
+            setEditlocation(i);
                setText(messages[i].text);
                setEditid(id);
                setEditing(true);
+               input.current.focus();
                return; 
             }
         }
@@ -88,7 +94,7 @@ const Home = () => {
                             <form onSubmit={(e) => {
                                 editing ? editmessage(e) : addmessage(e)
                             }} className="message_form">
-                                <input value={text} onChange={(e) => setText(e.target.value)} style={{width: '80%'}} type="text" />
+                                <input ref={input} value={text} onChange={(e) => setText(e.target.value)} style={{width: '80%'}} type="text" />
                                 <input type="submit"></input>
                             </form>
                         </div>
