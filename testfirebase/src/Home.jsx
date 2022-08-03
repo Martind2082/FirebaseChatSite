@@ -7,6 +7,8 @@ import {addDoc, collection, deleteDoc, doc, setDoc} from 'firebase/firestore';
 const Home = () => {
     const {googlesignin, user, logout, messages} = useContext(Authcontext);
     const [text, setText] = useState('');
+    const [editing, setEditing] = useState(false);
+    const [editid, setEditid] = useState('');
 
     const addmessage = async (e) => {
         e.preventDefault();
@@ -25,10 +27,22 @@ const Home = () => {
         await deleteDoc(docRef);
     }
 
-    const editmessage = async(id) => {
-        const docRef = doc(db, 'messages', id);
-        const payload = {text: 'edited'};
-        setDoc(docRef, payload)
+    const editmessage = async(e) => {
+        e.preventDefault();
+        const docRef = doc(db, 'messages', editid);
+        const payload = {text: text};
+        setDoc(docRef, payload);
+        setEditing(false);
+    }
+    const edit = (id) => {
+        for (let i = 0; i < messages.length; i++) {
+            if (messages[i].id === id) {
+               setText(messages[i].text);
+               setEditid(id);
+               setEditing(true);
+               return; 
+            }
+        }
     }
 
     return (
@@ -47,12 +61,14 @@ const Home = () => {
                                 {messages.map(message => {
                                     return <div className='msg' key={message.id}>
                                         {message.text}
-                                        <p onClick={() => editmessage(message.id)}>Edit</p>
-                                        <p onClick={() => deletemessage(message.id)}>delete</p>
+                                        <p className='hover' onClick={() => edit(message.id)}>Edit</p>
+                                        <p className='hover' onClick={() => deletemessage(message.id)}>Delete</p>
                                     </div>
                                 })}
                             </div>
-                            <form onSubmit={(e) => addmessage(e)} className="message_form">
+                            <form onSubmit={(e) => {
+                                editing ? editmessage(e) : addmessage(e)
+                            }} className="message_form">
                                 <input value={text} onChange={(e) => setText(e.target.value)} style={{width: '80%'}} type="text" />
                                 <input type="submit"></input>
                             </form>

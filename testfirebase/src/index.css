@@ -50,3 +50,6 @@ body, html {
 .msg:hover {
     background: rgb(255, 158, 174);
 }
+.hover {
+    cursor: pointer;
+}
