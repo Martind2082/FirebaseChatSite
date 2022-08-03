@@ -56,3 +56,9 @@ body, html {
 .hover {
     cursor: pointer;
 }
+
+@media (max-width: 800px) {
+    .message_form {
+        top: 0.1rem;
+    }
+}
