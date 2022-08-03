@@ -1,18 +1,18 @@
 import {GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged} from 'firebase/auth';
 import { createContext, useEffect, useState } from 'react';
-import {auth, db} from './Firebase.jsx';
-import {addDoc, collection, doc, onSnapshot, query} from 'firebase/firestore';
+import {auth} from './Firebase.jsx';
+import Home from './Home';
+import Signin from './Signin';
 
 export const Authcontext = createContext();
 
-export const AuthContextProvider = ({children}) => {
+export const AuthContextProvider = () => {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState();
-    const [messages, setMessages] = useState([]);
 
-    const googlesignin = () => {
+    function googlesignin() {
         const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider);
+        signInWithPopup(auth, provider)
     }
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, user => {
@@ -25,21 +25,15 @@ export const AuthContextProvider = ({children}) => {
         signOut(auth);
     }
 
-    useEffect(() => {
-        const q = query(collection(db, 'messages'))
-        const unsub = onSnapshot(q, (snapshot) => {
-            let messagearray = [];
-            snapshot.forEach(message => {
-                messagearray.push({...message.data(), id: message.id})
-            });
-            setMessages(messagearray);
-        })
-        return () => unsub();
-    }, [])
+
 
     return (
-        <Authcontext.Provider value={{googlesignin, logout, user, messages}}>
-            {!loading && children}
+        <Authcontext.Provider value={{googlesignin, logout, user}}>
+            {!loading &&           <div>
+          {
+            user ? <Home /> : <Signin />
+          }
+          </div>}
         </Authcontext.Provider>
     )
 }

@@ -25,7 +25,10 @@ body, html {
     border: 2px solid black;
     background: pink;
 }
-
+.messagesfromdb {
+    height: 80%;
+    width: 100%;
+}
 .message_form {
     width: 100%;
     height: 2rem;

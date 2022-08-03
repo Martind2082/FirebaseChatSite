@@ -1,18 +1,13 @@
 import './index.css';
-import React from 'react';
+import React, { useContext } from 'react';
 import { AuthContextProvider } from './Authcontext';
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
-import Home from './Home';
+import { Authcontext } from './Authcontext';
 
 function App() {
+  const user = useContext(Authcontext);
   return (
       <div className="App">
         <AuthContextProvider>
-          <Router>
-            <Routes>
-              <Route exact path="/" element={<Home />}/>
-            </Routes>
-          </Router>
         </AuthContextProvider>
       </div>  
   )

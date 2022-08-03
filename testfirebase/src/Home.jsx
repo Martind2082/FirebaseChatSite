@@ -1,33 +1,51 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './index.css';
 import { Authcontext } from './Authcontext';
 import {db} from './Firebase.jsx';
-import {addDoc, collection, deleteDoc, doc, setDoc} from 'firebase/firestore';
+import {addDoc, collection, deleteDoc, doc, setDoc, query, onSnapshot, serverTimestamp, orderBy, } from 'firebase/firestore';
 
 const Home = () => {
-    const {googlesignin, user, logout, messages} = useContext(Authcontext);
+    const {googlesignin, user, logout} = useContext(Authcontext);
     const [text, setText] = useState('');
     const [editing, setEditing] = useState(false);
     const [editid, setEditid] = useState('');
+    const [messages, setMessages] = useState([]);
 
-    const addmessage = async (e) => {
+    useEffect(() => {
+        const q = query(collection(db, 'messages'), orderBy("createdAt"))
+        const unsub = onSnapshot(q, (snapshot) => {
+            const docRef = doc(db, 'messages', snapshot.docs[0].id);
+            if (snapshot.docs.length > 7) {
+                deleteDoc(docRef);
+            }
+            let messagearray = [];
+            snapshot.docs.forEach(message => {
+                messagearray.push({...message.data(), id: message.id})
+            });
+            setMessages(messagearray);
+        })
+        return unsub;
+    }, [])
+
+    const addmessage = (e) => {
         e.preventDefault();
 
         if (text.length === 0) {
             return;
         }
-        await addDoc(collection(db, 'messages'), {
-            text: text
+        addDoc(collection(db, 'messages'), {
+            text: text,
+            createdAt: serverTimestamp()
         })
         setText('');
     }
 
-    const deletemessage = async (id) => {
+    const deletemessage = (id) => {
         const docRef = doc(db, 'messages', id);
-        await deleteDoc(docRef);
+        deleteDoc(docRef);
     }
 
-    const editmessage = async(e) => {
+    const editmessage = (e) => {
         e.preventDefault();
         const docRef = doc(db, 'messages', editid);
         const payload = {text: text};
@@ -44,6 +62,7 @@ const Home = () => {
             }
         }
     }
+
 
     return (
         <div className="home">
